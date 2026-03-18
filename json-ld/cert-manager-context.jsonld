@@ -1,0 +1,249 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "certmgr": "https://cert-manager.io/vocab/",
+    "k8s": "https://kubernetes.io/vocab/",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "sec": "https://w3id.org/security#",
+
+    "Certificate": {
+      "@id": "certmgr:Certificate",
+      "@context": {
+        "apiVersion": {
+          "@id": "k8s:apiVersion"
+        },
+        "kind": {
+          "@id": "k8s:kind"
+        },
+        "metadata": {
+          "@id": "k8s:metadata"
+        },
+        "spec": {
+          "@id": "certmgr:certificateSpec"
+        },
+        "status": {
+          "@id": "certmgr:certificateStatus"
+        }
+      }
+    },
+
+    "CertificateSpec": {
+      "@id": "certmgr:CertificateSpec",
+      "@context": {
+        "secretName": {
+          "@id": "certmgr:secretName"
+        },
+        "issuerRef": {
+          "@id": "certmgr:issuerRef"
+        },
+        "commonName": {
+          "@id": "schema:name"
+        },
+        "dnsNames": {
+          "@id": "certmgr:dnsNames",
+          "@container": "@set"
+        },
+        "uris": {
+          "@id": "certmgr:uris",
+          "@container": "@set"
+        },
+        "emailAddresses": {
+          "@id": "schema:email",
+          "@container": "@set"
+        },
+        "ipAddresses": {
+          "@id": "certmgr:ipAddresses",
+          "@container": "@set"
+        },
+        "duration": {
+          "@id": "certmgr:duration"
+        },
+        "renewBefore": {
+          "@id": "certmgr:renewBefore"
+        },
+        "isCA": {
+          "@id": "certmgr:isCA",
+          "@type": "xsd:boolean"
+        },
+        "usages": {
+          "@id": "certmgr:keyUsages",
+          "@container": "@set"
+        },
+        "privateKey": {
+          "@id": "certmgr:privateKeyConfig"
+        }
+      }
+    },
+
+    "CertificateStatus": {
+      "@id": "certmgr:CertificateStatus",
+      "@context": {
+        "conditions": {
+          "@id": "k8s:conditions",
+          "@container": "@set"
+        },
+        "notBefore": {
+          "@id": "certmgr:notBefore",
+          "@type": "xsd:dateTime"
+        },
+        "notAfter": {
+          "@id": "certmgr:notAfter",
+          "@type": "xsd:dateTime"
+        },
+        "renewalTime": {
+          "@id": "certmgr:renewalTime",
+          "@type": "xsd:dateTime"
+        },
+        "revision": {
+          "@id": "certmgr:revision",
+          "@type": "xsd:integer"
+        }
+      }
+    },
+
+    "Issuer": {
+      "@id": "certmgr:Issuer",
+      "@context": {
+        "spec": {
+          "@id": "certmgr:issuerSpec"
+        },
+        "status": {
+          "@id": "certmgr:issuerStatus"
+        }
+      }
+    },
+
+    "ClusterIssuer": {
+      "@id": "certmgr:ClusterIssuer",
+      "@context": {
+        "spec": {
+          "@id": "certmgr:issuerSpec"
+        },
+        "status": {
+          "@id": "certmgr:issuerStatus"
+        }
+      }
+    },
+
+    "IssuerSpec": {
+      "@id": "certmgr:IssuerSpec",
+      "@context": {
+        "acme": {
+          "@id": "certmgr:acmeConfig"
+        },
+        "ca": {
+          "@id": "certmgr:caConfig"
+        },
+        "selfSigned": {
+          "@id": "certmgr:selfSignedConfig"
+        },
+        "vault": {
+          "@id": "certmgr:vaultConfig"
+        },
+        "venafi": {
+          "@id": "certmgr:venafiConfig"
+        }
+      }
+    },
+
+    "ACMEIssuer": {
+      "@id": "certmgr:ACMEIssuer",
+      "@context": {
+        "server": {
+          "@id": "certmgr:acmeServer",
+          "@type": "@id"
+        },
+        "email": {
+          "@id": "schema:email"
+        },
+        "privateKeySecretRef": {
+          "@id": "certmgr:privateKeySecretRef"
+        },
+        "solvers": {
+          "@id": "certmgr:solvers",
+          "@container": "@set"
+        }
+      }
+    },
+
+    "CAIssuer": {
+      "@id": "certmgr:CAIssuer",
+      "@context": {
+        "secretName": {
+          "@id": "certmgr:caSecretName"
+        },
+        "crlDistributionPoints": {
+          "@id": "sec:crlDistributionPoints",
+          "@container": "@set"
+        },
+        "ocspServers": {
+          "@id": "sec:ocspServers",
+          "@container": "@set"
+        }
+      }
+    },
+
+    "CertificateRequest": {
+      "@id": "certmgr:CertificateRequest",
+      "@context": {
+        "spec": {
+          "@id": "certmgr:certificateRequestSpec"
+        },
+        "status": {
+          "@id": "certmgr:certificateRequestStatus"
+        }
+      }
+    },
+
+    "CertificateRequestPolicy": {
+      "@id": "certmgr:CertificateRequestPolicy",
+      "@context": {
+        "spec": {
+          "@id": "certmgr:policySpec"
+        },
+        "status": {
+          "@id": "certmgr:policyStatus"
+        }
+      }
+    },
+
+    "ObjectReference": {
+      "@id": "k8s:ObjectReference",
+      "@context": {
+        "name": {
+          "@id": "schema:name"
+        },
+        "kind": {
+          "@id": "k8s:kind"
+        },
+        "group": {
+          "@id": "k8s:group"
+        }
+      }
+    },
+
+    "Condition": {
+      "@id": "k8s:Condition",
+      "@context": {
+        "type": {
+          "@id": "k8s:conditionType"
+        },
+        "status": {
+          "@id": "k8s:conditionStatus"
+        },
+        "reason": {
+          "@id": "k8s:conditionReason"
+        },
+        "message": {
+          "@id": "schema:description"
+        },
+        "lastTransitionTime": {
+          "@id": "k8s:lastTransitionTime",
+          "@type": "xsd:dateTime"
+        }
+      }
+    }
+  }
+}

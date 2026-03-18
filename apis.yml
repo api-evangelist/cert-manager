@@ -17,7 +17,7 @@ tags:
 - Cloud Native
 - Graduated
 created: '2026-03-16'
-modified: '2026-03-16'
+modified: '2026-03-18'
 specificationVersion: '0.19'
 type: Index
 apis:
@@ -30,9 +30,22 @@ apis:
     automatic renewal, and integration with ACME and other certificate
     authorities directly through kubectl and Kubernetes manifests.
   humanURL: https://cert-manager.io/docs/
+  image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
   properties:
   - type: Documentation
     url: https://cert-manager.io/docs/
+  - type: Reference
+    url: https://cert-manager.io/docs/reference/api-docs/
+  - type: Getting Started
+    url: https://cert-manager.io/docs/getting-started/
+  - type: GitHubRepository
+    url: https://github.com/cert-manager/cert-manager
+  - type: Change Log
+    url: https://github.com/cert-manager/cert-manager/releases
+  - type: JSONSchema
+    url: json-schema/cert-manager-certificate-schema.json
+  - type: JSONSchema
+    url: json-schema/cert-manager-issuer-schema.json
   tags:
   - Certificates
   - Kubernetes API
@@ -45,25 +58,121 @@ apis:
     renewals, approving or denying certificate requests, and converting
     cert-manager resources between API versions.
   humanURL: https://cert-manager.io/docs/reference/cmctl/
+  image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
   properties:
   - type: Documentation
     url: https://cert-manager.io/docs/reference/cmctl/
+  - type: GitHubRepository
+    url: https://github.com/cert-manager/cmctl
+  - type: Change Log
+    url: https://github.com/cert-manager/cmctl/releases
   tags:
   - CLI
   - Certificate Management
+- aid: cert-manager:trust-manager
+  name: trust-manager
+  description: >-
+    trust-manager is a cert-manager companion project for managing TLS trust
+    bundles in Kubernetes and OpenShift clusters. It distributes CA bundles
+    via a Bundle custom resource to namespaces and workloads, ensuring that
+    applications have access to an up-to-date set of trusted CA certificates
+    without manual maintenance.
+  humanURL: https://cert-manager.io/docs/trust/trust-manager/
+  image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+  properties:
+  - type: Documentation
+    url: https://cert-manager.io/docs/trust/trust-manager/
+  - type: Getting Started
+    url: https://cert-manager.io/docs/trust/trust-manager/installation/
+  - type: GitHubRepository
+    url: https://github.com/cert-manager/trust-manager
+  - type: Change Log
+    url: https://github.com/cert-manager/trust-manager/releases
+  tags:
+  - Trust Bundles
+  - TLS
+  - Kubernetes
+- aid: cert-manager:approver-policy
+  name: cert-manager approver-policy
+  description: >-
+    approver-policy is a cert-manager policy plugin that automatically
+    approves or denies CertificateRequest resources based on defined
+    CertificateRequestPolicy custom resources. It provides fine-grained
+    control over which certificate requests are permitted, including
+    constraints on allowed DNS names, key usages, and issuers.
+  humanURL: https://cert-manager.io/docs/policy/approval/approver-policy/
+  image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+  properties:
+  - type: Documentation
+    url: https://cert-manager.io/docs/policy/approval/approver-policy/
+  - type: GitHubRepository
+    url: https://github.com/cert-manager/approver-policy
+  - type: Change Log
+    url: https://github.com/cert-manager/approver-policy/releases
+  tags:
+  - Policy
+  - Certificate Approval
+  - Security
+- aid: cert-manager:csi-driver
+  name: cert-manager csi-driver
+  description: >-
+    csi-driver is a Kubernetes Container Storage Interface plugin that
+    works alongside cert-manager to seamlessly request and mount certificate
+    key pairs as ephemeral volumes directly into pods. It enables workloads
+    to automatically obtain short-lived certificates at pod startup without
+    requiring manual secret management.
+  humanURL: https://cert-manager.io/docs/usage/csi-driver/
+  image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+  properties:
+  - type: Documentation
+    url: https://cert-manager.io/docs/usage/csi-driver/
+  tags:
+  - CSI
+  - Kubernetes
+  - Certificate Management
+- aid: cert-manager:csi-driver-spiffe
+  name: cert-manager csi-driver-spiffe
+  description: >-
+    csi-driver-spiffe is a Kubernetes CSI plugin that works alongside
+    cert-manager to transparently deliver SPIFFE SVIDs as X.509 certificate
+    key pairs to mounted pods using ephemeral volumes. It allows all pods
+    running in a Kubernetes cluster to automatically receive SPIFFE identity
+    documents from a configured Trust Domain.
+  humanURL: https://cert-manager.io/docs/usage/csi-driver-spiffe/
+  image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+  properties:
+  - type: Documentation
+    url: https://cert-manager.io/docs/usage/csi-driver-spiffe/
+  - type: Getting Started
+    url: https://cert-manager.io/docs/usage/csi-driver-spiffe/installation/
+  tags:
+  - SPIFFE
+  - CSI
+  - Identity
+  - Kubernetes
 common:
+- type: Website
+  url: https://cert-manager.io
 - type: Documentation
-  name: cert-manager Documentation
-  description: Official documentation covering installation, configuration, and usage.
   url: https://cert-manager.io/docs/
-- type: GitHubOrg
-  name: cert-manager GitHub
-  description: Source code and related projects.
-  url: https://github.com/cert-manager
-- type: GettingStarted
-  name: Getting Started Guide
-  description: Quickstart guide for installing cert-manager on Kubernetes.
+- type: Getting Started
   url: https://cert-manager.io/docs/getting-started/
+- type: Reference
+  url: https://cert-manager.io/docs/reference/
+- type: Community
+  url: https://cert-manager.io/docs/contributing/
+- type: GitHubOrganization
+  url: https://github.com/cert-manager
+- type: GitHubRepository
+  url: https://github.com/cert-manager/cert-manager
+- type: Change Log
+  url: https://github.com/cert-manager/cert-manager/releases
+- type: JSONSchema
+  url: json-schema/cert-manager-certificate-schema.json
+- type: JSONSchema
+  url: json-schema/cert-manager-issuer-schema.json
+- type: JSON-LD
+  url: json-ld/cert-manager-context.jsonld
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

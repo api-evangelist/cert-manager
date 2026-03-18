@@ -1,0 +1,595 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/api-evangelist/cert-manager/blob/main/json-schema/cert-manager-issuer-schema.json",
+  "title": "cert-manager Issuer and ClusterIssuer",
+  "description": "JSON Schema for cert-manager Issuer and ClusterIssuer custom resources (cert-manager.io/v1). An Issuer represents a certificate authority scoped to a single namespace, while a ClusterIssuer is cluster-scoped and can serve Certificate resources across all namespaces. Both resources configure the backend certificate authority connection including ACME, CA, SelfSigned, Vault, and Venafi issuer types.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "description": "The cert-manager API version.",
+      "const": "cert-manager.io/v1"
+    },
+    "kind": {
+      "type": "string",
+      "description": "The resource kind: Issuer (namespace-scoped) or ClusterIssuer (cluster-scoped).",
+      "enum": ["Issuer", "ClusterIssuer"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Kubernetes ObjectMeta for the Issuer or ClusterIssuer resource.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the Issuer or ClusterIssuer resource.",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace for Issuer resources. Not used for ClusterIssuer."
+        },
+        "labels": {
+          "type": "object",
+          "description": "Kubernetes labels.",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "spec": {
+      "$ref": "#/$defs/IssuerSpec"
+    },
+    "status": {
+      "$ref": "#/$defs/IssuerStatus"
+    }
+  },
+  "$defs": {
+    "IssuerSpec": {
+      "type": "object",
+      "description": "Desired state of the Issuer or ClusterIssuer resource. Exactly one issuer type must be configured: acme, ca, selfSigned, vault, or venafi.",
+      "properties": {
+        "acme": {
+          "$ref": "#/$defs/ACMEIssuer"
+        },
+        "ca": {
+          "$ref": "#/$defs/CAIssuer"
+        },
+        "selfSigned": {
+          "$ref": "#/$defs/SelfSignedIssuer"
+        },
+        "vault": {
+          "$ref": "#/$defs/VaultIssuer"
+        },
+        "venafi": {
+          "$ref": "#/$defs/VenafiIssuer"
+        }
+      }
+    },
+    "ACMEIssuer": {
+      "type": "object",
+      "description": "Configuration for an ACME (RFC 8555) certificate authority such as Let's Encrypt, ZeroSSL, or a private ACME server. ACME issuers obtain certificates by completing DNS or HTTP challenges proving domain ownership.",
+      "required": ["server", "privateKeySecretRef"],
+      "properties": {
+        "server": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the ACME server's directory endpoint. For Let's Encrypt production: https://acme-v02.api.letsencrypt.org/directory. For Let's Encrypt staging: https://acme-staging-v02.api.letsencrypt.org/directory."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address for the ACME account registration. Used for expiry notifications from the CA."
+        },
+        "externalAccountBinding": {
+          "type": "object",
+          "description": "Optional External Account Binding (EAB) configuration required by some ACME providers (e.g., ZeroSSL) to associate the ACME account with an existing account in the CA's system.",
+          "required": ["keyID", "keySecretRef"],
+          "properties": {
+            "keyID": {
+              "type": "string",
+              "description": "The key identifier provided by the CA for EAB."
+            },
+            "keySecretRef": {
+              "type": "object",
+              "description": "Reference to a Secret containing the EAB HMAC key.",
+              "required": ["name", "key"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the Secret."
+                },
+                "key": {
+                  "type": "string",
+                  "description": "Key within the Secret containing the HMAC key value."
+                }
+              }
+            },
+            "keyAlgorithm": {
+              "type": "string",
+              "description": "HMAC algorithm used for the EAB key.",
+              "enum": ["HS256", "HS384", "HS512"]
+            }
+          }
+        },
+        "privateKeySecretRef": {
+          "type": "object",
+          "description": "Reference to the Secret where the ACME account private key is stored. cert-manager will generate and store the private key here if it does not already exist.",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the Secret containing the ACME account private key."
+            },
+            "key": {
+              "type": "string",
+              "description": "Key within the Secret containing the private key. Defaults to 'tls.key'."
+            }
+          }
+        },
+        "skipTLSVerify": {
+          "type": "boolean",
+          "description": "Whether to disable TLS certificate verification when communicating with the ACME server. Only use for development/testing with self-signed ACME servers.",
+          "default": false
+        },
+        "preferredChain": {
+          "type": "string",
+          "description": "Name of the preferred certificate chain to use when multiple chains are offered by the CA. For example, 'ISRG Root X1' for Let's Encrypt."
+        },
+        "caBundle": {
+          "type": "string",
+          "format": "byte",
+          "description": "Base64-encoded PEM bundle of CA certificates to trust when verifying the ACME server's TLS certificate. Used with private ACME servers."
+        },
+        "solvers": {
+          "type": "array",
+          "description": "List of challenge solver configurations used by the ACME issuer for domain ownership verification. At least one solver is required. Solvers are selected by matching selectors against the domains in a certificate request.",
+          "items": {
+            "$ref": "#/$defs/ACMEChallengeSolver"
+          }
+        },
+        "disableAccountKeyGeneration": {
+          "type": "boolean",
+          "description": "Whether to disable automatic generation of the ACME account private key. If true, the key must already exist in the Secret referenced by privateKeySecretRef.",
+          "default": false
+        },
+        "enableDurationFeature": {
+          "type": "boolean",
+          "description": "Whether to request a specific certificate duration from the ACME server using the ACME renewalInfo (ARI) extension. Only supported by some ACME servers."
+        }
+      }
+    },
+    "ACMEChallengeSolver": {
+      "type": "object",
+      "description": "A challenge solver configuration specifying how to complete ACME challenges for matching domains. A solver may use HTTP-01 or DNS-01 challenge types.",
+      "properties": {
+        "selector": {
+          "type": "object",
+          "description": "Optional selector restricting which Certificate requests and domains this solver applies to. If omitted, this solver is used as a fallback.",
+          "properties": {
+            "dnsNames": {
+              "type": "array",
+              "description": "DNS names that this solver handles. Takes priority over dnsZones when both match.",
+              "items": {
+                "type": "string",
+                "description": "An exact DNS name this solver handles."
+              }
+            },
+            "dnsZones": {
+              "type": "array",
+              "description": "DNS zones that this solver handles. A solver is selected if the domain is a subdomain of any listed zone.",
+              "items": {
+                "type": "string",
+                "description": "A DNS zone (e.g., example.com)."
+              }
+            },
+            "matchLabels": {
+              "type": "object",
+              "description": "Label selector matching Certificate resources this solver should be used for.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "http01": {
+          "type": "object",
+          "description": "HTTP-01 challenge solver configuration. cert-manager creates temporary Ingress or Gateway API resources to serve the challenge response over HTTP.",
+          "properties": {
+            "ingress": {
+              "type": "object",
+              "description": "Ingress-based HTTP-01 challenge solver.",
+              "properties": {
+                "class": {
+                  "type": "string",
+                  "description": "Ingress class annotation value for the temporary challenge Ingress. Deprecated; use ingressClassName instead."
+                },
+                "ingressClassName": {
+                  "type": "string",
+                  "description": "IngressClass name for the challenge Ingress resource."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name of an existing Ingress resource to append challenge rules to."
+                },
+                "serviceType": {
+                  "type": "string",
+                  "description": "Kubernetes Service type for the HTTP-01 challenge server. Defaults to NodePort.",
+                  "enum": ["ClusterIP", "NodePort"]
+                }
+              }
+            },
+            "gatewayHTTPRoute": {
+              "type": "object",
+              "description": "Gateway API-based HTTP-01 challenge solver using HTTPRoute resources.",
+              "properties": {
+                "parentRefs": {
+                  "type": "array",
+                  "description": "Gateway parent references for the challenge HTTPRoute.",
+                  "items": {
+                    "type": "object",
+                    "description": "A Gateway parent reference."
+                  }
+                },
+                "labels": {
+                  "type": "object",
+                  "description": "Labels to add to the challenge HTTPRoute.",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "podTemplate": {
+              "type": "object",
+              "description": "Optional template for the Pod created to serve the HTTP-01 challenge response."
+            }
+          }
+        },
+        "dns01": {
+          "type": "object",
+          "description": "DNS-01 challenge solver configuration. cert-manager creates temporary DNS TXT records to prove domain ownership.",
+          "properties": {
+            "cnameStrategy": {
+              "type": "string",
+              "description": "Strategy for following CNAME records when resolving DNS for challenges.",
+              "enum": ["None", "Follow"],
+              "default": "None"
+            },
+            "acmeDNS": {
+              "type": "object",
+              "description": "acme-dns server configuration for DNS-01 challenges."
+            },
+            "akamai": {
+              "type": "object",
+              "description": "Akamai FastDNS configuration for DNS-01 challenges."
+            },
+            "azureDNS": {
+              "type": "object",
+              "description": "Azure DNS configuration for DNS-01 challenges."
+            },
+            "cloudDNS": {
+              "type": "object",
+              "description": "Google Cloud DNS configuration for DNS-01 challenges."
+            },
+            "cloudflare": {
+              "type": "object",
+              "description": "Cloudflare DNS configuration for DNS-01 challenges."
+            },
+            "digitalocean": {
+              "type": "object",
+              "description": "DigitalOcean DNS configuration for DNS-01 challenges."
+            },
+            "rfc2136": {
+              "type": "object",
+              "description": "RFC 2136 (Dynamic DNS Update) configuration for DNS-01 challenges."
+            },
+            "route53": {
+              "type": "object",
+              "description": "AWS Route53 DNS configuration for DNS-01 challenges."
+            },
+            "webhook": {
+              "type": "object",
+              "description": "External webhook DNS provider configuration for DNS-01 challenges."
+            }
+          }
+        }
+      }
+    },
+    "CAIssuer": {
+      "type": "object",
+      "description": "Configuration for a CA issuer that signs certificates using a CA certificate stored in a Kubernetes Secret. The CA certificate and private key must already exist in the cluster.",
+      "required": ["secretName"],
+      "properties": {
+        "secretName": {
+          "type": "string",
+          "description": "Name of the Secret containing the CA certificate (tls.crt) and CA private key (tls.key) in the same namespace as the Issuer, or in the cert-manager namespace for ClusterIssuer.",
+          "minLength": 1
+        },
+        "crlDistributionPoints": {
+          "type": "array",
+          "description": "Optional list of CRL Distribution Point URLs to embed in issued certificates.",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "description": "A CRL distribution point URL."
+          }
+        },
+        "ocspServers": {
+          "type": "array",
+          "description": "Optional list of OCSP server URLs to embed in issued certificates.",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "description": "An OCSP server URL."
+          }
+        },
+        "issuingCertificateURLs": {
+          "type": "array",
+          "description": "Optional list of Issuing Certificate URLs to embed in issued certificates (AIA extension).",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "description": "An issuing certificate URL."
+          }
+        }
+      }
+    },
+    "SelfSignedIssuer": {
+      "type": "object",
+      "description": "Configuration for a SelfSigned issuer that signs certificates with their own private key. Useful for bootstrapping PKI hierarchies or generating self-signed CA certificates. No configuration is required.",
+      "properties": {
+        "crlDistributionPoints": {
+          "type": "array",
+          "description": "Optional list of CRL Distribution Point URLs to embed in issued self-signed certificates.",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "description": "A CRL distribution point URL."
+          }
+        }
+      }
+    },
+    "VaultIssuer": {
+      "type": "object",
+      "description": "Configuration for a HashiCorp Vault issuer that signs certificates using Vault's PKI Secrets Engine.",
+      "required": ["server", "path", "auth"],
+      "properties": {
+        "server": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the HashiCorp Vault server (e.g., https://vault.example.com)."
+        },
+        "path": {
+          "type": "string",
+          "description": "Vault PKI path for signing certificates (e.g., pki/sign/my-role or pki_int/sign/my-role).",
+          "minLength": 1
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Vault namespace for Vault Enterprise clusters."
+        },
+        "caBundle": {
+          "type": "string",
+          "format": "byte",
+          "description": "Base64-encoded PEM CA bundle for verifying the Vault server's TLS certificate."
+        },
+        "auth": {
+          "type": "object",
+          "description": "Vault authentication configuration. Exactly one authentication method must be specified.",
+          "properties": {
+            "tokenSecretRef": {
+              "type": "object",
+              "description": "Vault token authentication using a token stored in a Kubernetes Secret.",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the Secret containing the Vault token."
+                },
+                "key": {
+                  "type": "string",
+                  "description": "Key within the Secret containing the Vault token. Defaults to 'token'."
+                }
+              }
+            },
+            "appRole": {
+              "type": "object",
+              "description": "Vault AppRole authentication using a role ID and secret ID.",
+              "required": ["path", "roleId", "secretRef"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "AppRole auth mount path (e.g., approle)."
+                },
+                "roleId": {
+                  "type": "string",
+                  "description": "The AppRole role ID."
+                },
+                "secretRef": {
+                  "type": "object",
+                  "description": "Reference to a Secret containing the AppRole secret ID.",
+                  "required": ["name"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the Secret."
+                    },
+                    "key": {
+                      "type": "string",
+                      "description": "Key within the Secret. Defaults to 'secretId'."
+                    }
+                  }
+                }
+              }
+            },
+            "kubernetes": {
+              "type": "object",
+              "description": "Vault Kubernetes auth using a Kubernetes ServiceAccount token.",
+              "required": ["role"],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "description": "Vault Kubernetes auth role name."
+                },
+                "mountPath": {
+                  "type": "string",
+                  "description": "Kubernetes auth mount path. Defaults to /v1/auth/kubernetes.",
+                  "default": "/v1/auth/kubernetes"
+                },
+                "serviceAccountRef": {
+                  "type": "object",
+                  "description": "Optional reference to a specific ServiceAccount to use for authentication.",
+                  "required": ["name"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "ServiceAccount name."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "VenafiIssuer": {
+      "type": "object",
+      "description": "Configuration for a Venafi (CyberArk) issuer that signs certificates using Venafi Trust Protection Platform (TPP) or Venafi as a Service (VaaS/TLS Protect Cloud).",
+      "required": ["zone"],
+      "properties": {
+        "zone": {
+          "type": "string",
+          "description": "Venafi policy zone path. For TPP, this is the policy folder path. For VaaS, this is the application name and issuing template.",
+          "minLength": 1
+        },
+        "tpp": {
+          "type": "object",
+          "description": "Venafi Trust Protection Platform (TPP) connection configuration.",
+          "required": ["url", "credentialsRef"],
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Base URL of the Venafi TPP server (e.g., https://tpp.example.com/vedsdk)."
+            },
+            "caBundle": {
+              "type": "string",
+              "format": "byte",
+              "description": "Base64-encoded PEM CA bundle for verifying the TPP server TLS certificate."
+            },
+            "credentialsRef": {
+              "type": "object",
+              "description": "Reference to a Secret containing TPP username and password.",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the Secret containing the TPP credentials."
+                }
+              }
+            }
+          }
+        },
+        "cloud": {
+          "type": "object",
+          "description": "Venafi as a Service (TLS Protect Cloud) connection configuration.",
+          "required": ["apiTokenSecretRef"],
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL of the Venafi Cloud API. Defaults to https://api.venafi.cloud.",
+              "default": "https://api.venafi.cloud"
+            },
+            "apiTokenSecretRef": {
+              "type": "object",
+              "description": "Reference to a Secret containing the Venafi Cloud API token.",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the Secret containing the Venafi Cloud API token."
+                },
+                "key": {
+                  "type": "string",
+                  "description": "Key within the Secret. Defaults to 'api-key'."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "IssuerStatus": {
+      "type": "object",
+      "description": "Observed state of the Issuer or ClusterIssuer as maintained by the cert-manager controller.",
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "description": "List of status conditions. The Ready condition indicates whether the issuer is ready to sign certificates.",
+          "items": {
+            "$ref": "#/$defs/IssuerCondition"
+          }
+        },
+        "acme": {
+          "type": "object",
+          "description": "ACME-specific status including the registered account URI.",
+          "properties": {
+            "uri": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL of the registered ACME account."
+            },
+            "lastRegisteredEmail": {
+              "type": "string",
+              "format": "email",
+              "description": "Last email address used for the ACME account registration."
+            },
+            "lastPrivateKeyHash": {
+              "type": "string",
+              "description": "Hash of the ACME account private key for detecting key changes."
+            }
+          }
+        }
+      }
+    },
+    "IssuerCondition": {
+      "type": "object",
+      "description": "A status condition on an Issuer or ClusterIssuer resource.",
+      "required": ["type", "status"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The condition type. Ready indicates the issuer is ready to sign certificates.",
+          "enum": ["Ready"]
+        },
+        "status": {
+          "type": "string",
+          "description": "The condition status.",
+          "enum": ["True", "False", "Unknown"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Machine-readable reason code for the condition."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable message providing context for the condition status."
+        },
+        "lastTransitionTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time at which the condition last transitioned."
+        },
+        "observedGeneration": {
+          "type": "integer",
+          "description": "Spec generation this condition was computed from.",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

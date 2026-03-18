@@ -1,0 +1,545 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/api-evangelist/cert-manager/blob/main/json-schema/cert-manager-certificate-schema.json",
+  "title": "cert-manager Certificate",
+  "description": "JSON Schema for the cert-manager Certificate custom resource (cert-manager.io/v1). A Certificate is a Kubernetes CRD that declaratively specifies a desired X.509 certificate, including the secret name where it will be stored, the issuer that should sign it, the DNS names and other SANs to include, and renewal configuration. cert-manager controllers watch Certificate resources and automatically obtain, renew, and store the resulting TLS key pairs.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "description": "The cert-manager API version for this resource.",
+      "const": "cert-manager.io/v1"
+    },
+    "kind": {
+      "type": "string",
+      "description": "The resource kind, always Certificate.",
+      "const": "Certificate"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Kubernetes ObjectMeta for the Certificate resource including name and namespace.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the Certificate resource within its namespace.",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace of the Certificate resource. Must be the same namespace as the Secret where the certificate will be stored.",
+          "minLength": 1
+        },
+        "labels": {
+          "type": "object",
+          "description": "Kubernetes labels for the Certificate resource.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Kubernetes annotations for the Certificate resource.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "spec": {
+      "$ref": "#/$defs/CertificateSpec"
+    },
+    "status": {
+      "$ref": "#/$defs/CertificateStatus"
+    }
+  },
+  "$defs": {
+    "CertificateSpec": {
+      "type": "object",
+      "description": "Desired state of the Certificate resource specifying the certificate fields, issuer reference, renewal policy, and secret storage configuration.",
+      "required": ["secretName", "issuerRef"],
+      "properties": {
+        "secretName": {
+          "type": "string",
+          "description": "Name of the Kubernetes Secret resource that will be created or updated to store the signed certificate, private key, and CA certificate. The Secret will be created in the same namespace as the Certificate resource.",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "issuerRef": {
+          "$ref": "#/$defs/ObjectReference"
+        },
+        "commonName": {
+          "type": "string",
+          "description": "Requested common name (CN) in the certificate Subject. At most 64 characters. If not set, the first DNS name or URI SAN is used as the common name. Note that X.509 CAs may ignore the commonName when SANs are present.",
+          "maxLength": 64
+        },
+        "subject": {
+          "$ref": "#/$defs/X509Subject"
+        },
+        "literalSubject": {
+          "type": "string",
+          "description": "An LDAP-format string literal for the Subject DN to be used verbatim. Mutually exclusive with commonName and subject. Allows encoding of subject fields that are not directly configurable through subject.",
+          "minLength": 1
+        },
+        "dnsNames": {
+          "type": "array",
+          "description": "List of DNS Subject Alternative Names to include in the certificate. At least one of commonName, dnsNames, uris, emailAddresses, ipAddresses, or otherNames is required.",
+          "items": {
+            "type": "string",
+            "description": "A DNS name SAN (e.g., example.com or *.example.com)."
+          }
+        },
+        "uris": {
+          "type": "array",
+          "description": "List of URI Subject Alternative Names to include in the certificate. Useful for SPIFFE identity documents.",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI SAN (e.g., spiffe://cluster.local/ns/default/sa/myapp)."
+          }
+        },
+        "emailAddresses": {
+          "type": "array",
+          "description": "List of email address Subject Alternative Names to include in the certificate.",
+          "items": {
+            "type": "string",
+            "format": "email",
+            "description": "An email address SAN."
+          }
+        },
+        "ipAddresses": {
+          "type": "array",
+          "description": "List of IP address Subject Alternative Names to include in the certificate.",
+          "items": {
+            "type": "string",
+            "description": "An IP address SAN in dotted decimal (IPv4) or colon-separated (IPv6) notation."
+          }
+        },
+        "duration": {
+          "type": "string",
+          "description": "Requested certificate lifetime as a Go duration string (e.g., 2160h for 90 days). Minimum value is 1h. Default is 90 days. Must be greater than renewBefore.",
+          "pattern": "^([0-9]+(h|m|s))+$"
+        },
+        "renewBefore": {
+          "type": "string",
+          "description": "Requested time before certificate expiry to attempt renewal, expressed as a Go duration string (e.g., 360h for 15 days). Minimum value is 5m. Must be less than duration.",
+          "pattern": "^([0-9]+(h|m|s))+$"
+        },
+        "renewBeforePercentage": {
+          "type": "integer",
+          "description": "Alternative to renewBefore: percentage of the certificate duration before expiry at which renewal is attempted (1-99). Mutually exclusive with renewBefore.",
+          "minimum": 1,
+          "maximum": 99
+        },
+        "privateKey": {
+          "$ref": "#/$defs/CertificatePrivateKey"
+        },
+        "usages": {
+          "type": "array",
+          "description": "List of requested key usages. Defaults to digital signature and key encipherment for RSA keys.",
+          "items": {
+            "type": "string",
+            "description": "A key usage or extended key usage identifier.",
+            "enum": [
+              "signing",
+              "digital signature",
+              "content commitment",
+              "key encipherment",
+              "key agreement",
+              "data encipherment",
+              "cert sign",
+              "crl sign",
+              "encipher only",
+              "decipher only",
+              "any",
+              "server auth",
+              "client auth",
+              "code signing",
+              "email protection",
+              "s/mime",
+              "ipsec end system",
+              "ipsec tunnel",
+              "ipsec user",
+              "timestamping",
+              "ocsp signing",
+              "microsoft sgc",
+              "netscape sgc"
+            ]
+          }
+        },
+        "isCA": {
+          "type": "boolean",
+          "description": "Whether to mark the certificate as a CA certificate by setting the isCA bit on the certificate. Enables signing child certificates. Defaults to false.",
+          "default": false
+        },
+        "secretTemplate": {
+          "type": "object",
+          "description": "Optional labels and annotations to copy to the Secret resource that stores the certificate.",
+          "properties": {
+            "labels": {
+              "type": "object",
+              "description": "Labels to add to the certificate Secret.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Annotations to add to the certificate Secret.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalOutputFormats": {
+          "type": "array",
+          "description": "Optional list of additional output formats for the certificate and key stored in the Secret. Supported formats are CombinedPEM and DER.",
+          "items": {
+            "type": "object",
+            "description": "An additional output format specification.",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The output format type.",
+                "enum": ["CombinedPEM", "DER"]
+              }
+            }
+          }
+        },
+        "keystores": {
+          "$ref": "#/$defs/CertificateKeystores"
+        },
+        "revisionHistoryLimit": {
+          "type": "integer",
+          "description": "Maximum number of CertificateRequest revisions to keep. Defaults to 1. Setting to 0 means unlimited.",
+          "minimum": 0
+        },
+        "encodeUsagesInRequest": {
+          "type": "boolean",
+          "description": "Whether to encode the certificate usages in the Certificate Signing Request. Defaults to false for ACME issuers and true otherwise."
+        },
+        "nameConstraints": {
+          "type": "object",
+          "description": "Optional X.509 name constraints extension for CA certificates, restricting the namespace of names for subordinate certificates.",
+          "properties": {
+            "critical": {
+              "type": "boolean",
+              "description": "Whether to mark the name constraints extension as critical."
+            },
+            "permitted": {
+              "$ref": "#/$defs/NameConstraintItem"
+            },
+            "excluded": {
+              "$ref": "#/$defs/NameConstraintItem"
+            }
+          }
+        }
+      }
+    },
+    "ObjectReference": {
+      "type": "object",
+      "description": "A reference to the cert-manager Issuer or ClusterIssuer that should sign the certificate.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the Issuer or ClusterIssuer resource.",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind of the issuer resource. Defaults to Issuer for namespace-scoped issuers; use ClusterIssuer for cluster-scoped issuers.",
+          "enum": ["Issuer", "ClusterIssuer"],
+          "default": "Issuer"
+        },
+        "group": {
+          "type": "string",
+          "description": "API group of the issuer resource. Defaults to cert-manager.io. Set to an external issuer's API group for out-of-tree issuers.",
+          "default": "cert-manager.io"
+        }
+      }
+    },
+    "X509Subject": {
+      "type": "object",
+      "description": "X.509 subject fields to include in the certificate. All fields are optional.",
+      "properties": {
+        "organizations": {
+          "type": "array",
+          "description": "Organization (O) values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "An organization name."
+          }
+        },
+        "countries": {
+          "type": "array",
+          "description": "Country (C) values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "A two-letter ISO country code.",
+            "pattern": "^[A-Z]{2}$"
+          }
+        },
+        "organizationalUnits": {
+          "type": "array",
+          "description": "Organizational Unit (OU) values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "An organizational unit name."
+          }
+        },
+        "localities": {
+          "type": "array",
+          "description": "Locality (L) / city values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "A locality or city name."
+          }
+        },
+        "provinces": {
+          "type": "array",
+          "description": "Province (ST) / state values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "A province or state name."
+          }
+        },
+        "streetAddresses": {
+          "type": "array",
+          "description": "Street address values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "A street address line."
+          }
+        },
+        "postalCodes": {
+          "type": "array",
+          "description": "Postal code values for the certificate subject.",
+          "items": {
+            "type": "string",
+            "description": "A postal or ZIP code."
+          }
+        },
+        "serialNumber": {
+          "type": "string",
+          "description": "Serial number value for the certificate subject DN (not the certificate serial number)."
+        }
+      }
+    },
+    "CertificatePrivateKey": {
+      "type": "object",
+      "description": "Private key configuration for the certificate including algorithm, key size, and rotation policy.",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "description": "Algorithm to use for the private key. Defaults to RSA.",
+          "enum": ["RSA", "ECDSA", "Ed25519"],
+          "default": "RSA"
+        },
+        "size": {
+          "type": "integer",
+          "description": "Key size in bits for RSA keys (2048, 4096, or 8192) or ECDSA curves (256, 384, or 521). Ignored for Ed25519.",
+          "enum": [256, 384, 521, 2048, 4096, 8192]
+        },
+        "encoding": {
+          "type": "string",
+          "description": "Encoding format for the private key stored in the Secret. PKCS1 is the default for RSA; PKCS8 is recommended for better interoperability.",
+          "enum": ["PKCS1", "PKCS8"],
+          "default": "PKCS1"
+        },
+        "rotationPolicy": {
+          "type": "string",
+          "description": "Policy controlling whether a new private key is generated when renewing a certificate. Never reuses the same key; Always generates a new key on each renewal.",
+          "enum": ["Never", "Always"],
+          "default": "Never"
+        }
+      }
+    },
+    "CertificateKeystores": {
+      "type": "object",
+      "description": "Optional keystore output formats to include in the certificate Secret alongside the standard PEM-encoded certificate and key.",
+      "properties": {
+        "jks": {
+          "type": "object",
+          "description": "Configuration for generating a JKS (Java KeyStore) keystore in the Secret.",
+          "required": ["create"],
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Whether to generate a JKS keystore in the Secret."
+            },
+            "passwordSecretRef": {
+              "type": "object",
+              "description": "Reference to a Secret containing the JKS keystore password.",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the Secret containing the keystore password."
+                },
+                "key": {
+                  "type": "string",
+                  "description": "Key within the Secret containing the keystore password."
+                }
+              }
+            },
+            "alias": {
+              "type": "string",
+              "description": "Override the alias used for the certificate and key entry in the JKS keystore."
+            }
+          }
+        },
+        "pkcs12": {
+          "type": "object",
+          "description": "Configuration for generating a PKCS#12 keystore in the Secret.",
+          "required": ["create"],
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Whether to generate a PKCS#12 keystore in the Secret."
+            },
+            "passwordSecretRef": {
+              "type": "object",
+              "description": "Reference to a Secret containing the PKCS#12 keystore password.",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the Secret containing the keystore password."
+                },
+                "key": {
+                  "type": "string",
+                  "description": "Key within the Secret containing the keystore password."
+                }
+              }
+            },
+            "profile": {
+              "type": "string",
+              "description": "PKCS#12 profile controlling the encryption algorithms used. LegacyRC2 uses RC2 40-bit encryption (maximum compatibility); LegacyDES uses 3DES (moderate compatibility); Modern2023 uses AES-256 (best security).",
+              "enum": ["LegacyRC2", "LegacyDES", "Modern2023"]
+            }
+          }
+        }
+      }
+    },
+    "NameConstraintItem": {
+      "type": "object",
+      "description": "Name constraint patterns for permitted or excluded namespaces in a CA certificate.",
+      "properties": {
+        "dnsDomains": {
+          "type": "array",
+          "description": "Permitted or excluded DNS domain name patterns.",
+          "items": {
+            "type": "string",
+            "description": "A DNS domain pattern (e.g., example.com to permit only subdomains of example.com)."
+          }
+        },
+        "ipRanges": {
+          "type": "array",
+          "description": "Permitted or excluded IP address ranges in CIDR notation.",
+          "items": {
+            "type": "string",
+            "description": "An IP CIDR range (e.g., 10.0.0.0/8)."
+          }
+        },
+        "emailAddresses": {
+          "type": "array",
+          "description": "Permitted or excluded email address domains.",
+          "items": {
+            "type": "string",
+            "description": "An email address or domain pattern."
+          }
+        },
+        "uriDomains": {
+          "type": "array",
+          "description": "Permitted or excluded URI domain patterns.",
+          "items": {
+            "type": "string",
+            "description": "A URI domain pattern."
+          }
+        }
+      }
+    },
+    "CertificateStatus": {
+      "type": "object",
+      "description": "Observed state of the Certificate resource as maintained by the cert-manager controller. Do not set this field manually.",
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "description": "List of status conditions representing the current state of the Certificate. The Ready condition indicates whether the certificate is currently valid and up-to-date.",
+          "items": {
+            "$ref": "#/$defs/CertificateCondition"
+          }
+        },
+        "notBefore": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The not-before time of the currently stored certificate."
+        },
+        "notAfter": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The not-after (expiry) time of the currently stored certificate."
+        },
+        "renewalTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time at which cert-manager will attempt to renew the certificate."
+        },
+        "revision": {
+          "type": "integer",
+          "description": "The revision number of the current certificate. Incremented on each successful issuance.",
+          "minimum": 1
+        },
+        "nextPrivateKeySecretName": {
+          "type": "string",
+          "description": "Name of a Secret containing the next private key generated during a pending certificate rotation."
+        },
+        "lastFailureTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time at which the latest issuance attempt failed permanently."
+        }
+      }
+    },
+    "CertificateCondition": {
+      "type": "object",
+      "description": "A status condition on a Certificate resource describing a specific aspect of its current state.",
+      "required": ["type", "status"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The condition type. Ready indicates the certificate is valid and up-to-date. Issuing indicates cert-manager is actively issuing or renewing a certificate.",
+          "enum": ["Ready", "Issuing"]
+        },
+        "status": {
+          "type": "string",
+          "description": "The condition status (True, False, or Unknown).",
+          "enum": ["True", "False", "Unknown"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Machine-readable reason code for the condition status, such as 'Issued', 'InProgress', 'Failed', or 'Expired'."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable message providing context for the condition status."
+        },
+        "lastTransitionTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time at which the condition last transitioned between statuses."
+        },
+        "observedGeneration": {
+          "type": "integer",
+          "description": "The spec generation that this condition was computed from.",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
