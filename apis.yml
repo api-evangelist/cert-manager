@@ -1,5 +1,5 @@
 aid: cert-manager
-name: cert-manager
+name: Cert-Manager
 description: >-
   cert-manager is a powerful and extensible X.509 certificate controller for
   Kubernetes and OpenShift workloads. It obtains certificates from a variety
