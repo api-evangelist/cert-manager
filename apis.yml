@@ -36,11 +36,11 @@ apis:
         url: https://cert-manager.io/docs/
       - type: Reference
         url: https://cert-manager.io/docs/reference/api-docs/
-      - type: Getting Started
+      - type: GettingStarted
         url: https://cert-manager.io/docs/getting-started/
       - type: GitHubRepository
         url: https://github.com/cert-manager/cert-manager
-      - type: Change Log
+      - type: ChangeLog
         url: https://github.com/cert-manager/cert-manager/releases
       - type: JSONSchema
         url: json-schema/cert-manager-certificate-schema.json
@@ -64,7 +64,7 @@ apis:
         url: https://cert-manager.io/docs/reference/cmctl/
       - type: GitHubRepository
         url: https://github.com/cert-manager/cmctl
-      - type: Change Log
+      - type: ChangeLog
         url: https://github.com/cert-manager/cmctl/releases
     tags:
       - Certificate Management
@@ -82,11 +82,11 @@ apis:
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/trust/trust-manager/
-      - type: Getting Started
+      - type: GettingStarted
         url: https://cert-manager.io/docs/trust/trust-manager/installation/
       - type: GitHubRepository
         url: https://github.com/cert-manager/trust-manager
-      - type: Change Log
+      - type: ChangeLog
         url: https://github.com/cert-manager/trust-manager/releases
     tags:
       - Kubernetes
@@ -107,7 +107,7 @@ apis:
         url: https://cert-manager.io/docs/policy/approval/approver-policy/
       - type: GitHubRepository
         url: https://github.com/cert-manager/approver-policy
-      - type: Change Log
+      - type: ChangeLog
         url: https://github.com/cert-manager/approver-policy/releases
     tags:
       - Certificate Approval
@@ -143,7 +143,7 @@ apis:
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/usage/csi-driver-spiffe/
-      - type: Getting Started
+      - type: GettingStarted
         url: https://cert-manager.io/docs/usage/csi-driver-spiffe/installation/
     tags:
       - CSI
@@ -155,7 +155,7 @@ common:
     url: https://cert-manager.io
   - type: Documentation
     url: https://cert-manager.io/docs/
-  - type: Getting Started
+  - type: GettingStarted
     url: https://cert-manager.io/docs/getting-started/
   - type: Reference
     url: https://cert-manager.io/docs/reference/
@@ -165,13 +165,13 @@ common:
     url: https://github.com/cert-manager
   - type: GitHubRepository
     url: https://github.com/cert-manager/cert-manager
-  - type: Change Log
+  - type: ChangeLog
     url: https://github.com/cert-manager/cert-manager/releases
   - type: JSONSchema
     url: json-schema/cert-manager-certificate-schema.json
   - type: JSONSchema
     url: json-schema/cert-manager-issuer-schema.json
-  - type: JSON-LD
+  - type: JSONLD
     url: json-ld/cert-manager-context.jsonld
 maintainers:
   - FN: Kin Lane
