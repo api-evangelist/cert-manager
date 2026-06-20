@@ -8,7 +8,7 @@ description: >-
   before expiry. It supports certificate issuance for Ingress, Gateway API,
   and arbitrary workloads via Certificate resources.
 url: https://cert-manager.io
-image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 tags:
   - Certificates
   - Cloud Native
@@ -30,7 +30,7 @@ apis:
       automatic renewal, and integration with ACME and other certificate
       authorities directly through kubectl and Kubernetes manifests.
     humanURL: https://cert-manager.io/docs/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/
@@ -58,7 +58,7 @@ apis:
       renewals, approving or denying certificate requests, and converting
       cert-manager resources between API versions.
     humanURL: https://cert-manager.io/docs/reference/cmctl/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/reference/cmctl/
@@ -78,7 +78,7 @@ apis:
       applications have access to an up-to-date set of trusted CA certificates
       without manual maintenance.
     humanURL: https://cert-manager.io/docs/trust/trust-manager/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/trust/trust-manager/
@@ -101,7 +101,7 @@ apis:
       control over which certificate requests are permitted, including
       constraints on allowed DNS names, key usages, and issuers.
     humanURL: https://cert-manager.io/docs/policy/approval/approver-policy/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/policy/approval/approver-policy/
@@ -122,7 +122,7 @@ apis:
       to automatically obtain short-lived certificates at pod startup without
       requiring manual secret management.
     humanURL: https://cert-manager.io/docs/usage/csi-driver/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/usage/csi-driver/
@@ -139,7 +139,7 @@ apis:
       running in a Kubernetes cluster to automatically receive SPIFFE identity
       documents from a configured Trust Domain.
     humanURL: https://cert-manager.io/docs/usage/csi-driver-spiffe/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://cert-manager.io/docs/usage/csi-driver-spiffe/
