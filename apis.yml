@@ -151,6 +151,8 @@ apis:
       - Kubernetes
       - SPIFFE
 common:
+  - type: DomainSecurity
+    url: security/cert-manager-domain-security.yml
   - type: Website
     url: https://cert-manager.io
   - type: Documentation
