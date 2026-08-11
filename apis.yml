@@ -163,6 +163,17 @@ apis:
       - Kubernetes
       - SPIFFE
 common:
+  - type: IssueTracker
+    url: https://github.com/cert-manager/cert-manager/issues
+  - type: SecurityPolicy
+    url: https://github.com/cert-manager/cert-manager/blob/master/SECURITY.md
+  - type: CodeOfConduct
+    url: https://github.com/cert-manager/cert-manager/blob/master/CODE_OF_CONDUCT.md
+  - type: ContributionGuide
+    url: https://github.com/cert-manager/cert-manager/blob/master/CONTRIBUTING.md
+  - type: License
+    name: Apache-2.0
+    url: https://github.com/cert-manager/cert-manager/blob/master/LICENSE
   - type: DomainSecurity
     url: security/cert-manager-domain-security.yml
   - type: Website
