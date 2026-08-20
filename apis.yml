@@ -23,6 +23,13 @@ accessModel:
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cert-manager.png
 tags:
   - Certificates
+  - Cloud-Native
+  - Graduated
+  - Kubernetes
+  - Security
+  - TLS
+tags_raw:
+  - Certificates
   - Cloud Native
   - Graduated
   - Kubernetes
